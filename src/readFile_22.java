@@ -46,6 +46,4 @@ public class readFile_22 {
     }
 
 
-
-
 }
