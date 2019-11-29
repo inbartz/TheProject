@@ -41,6 +41,20 @@ public class Parse {
         buffer.close();
     }
 
+    public String parseDoc(String docText) {
+        // replace numbers
+
+        //
+
+
+
+    }
+
+
+
+
+
+
     public String cleanDoc(String text){
         // strips off all non-ASCII characters
         text = text.replaceAll("[^\\x00-\\x7F]", "");
