@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 public class Main {
 
@@ -43,25 +44,14 @@ public class Main {
                 "Nikola Popovski, Social Democratic            29/46           32/42 \n" +
                 "   Party parliamentarian \n" +
                 "\n";
-//
-//
-//        try {
-//            readFile_22 r = new readFile_22("C:\\Users\\inbar\\Desktop\\corpus");
-//        }
-//      catch (IOException e){
-//
-//
-//      }
 
-        Parse p = new Parse();
-//        try {
-//          String inbar=  p.RemoveStopwords(s);
-//            System.out.println(inbar);
-//        }
-//        catch (IOException E){
-//
-//        }
-       String teat = p.cleanDoc(s);
-       System.out.println(teat);
+
+         Parse p = new Parse();
+       //  p.findPattern("(\\d)+(\\d)+(/)+(\\d)+(\\d)+( )",s);
+       // StringBuilder st1 = new StringBuilder();
+        //st1.append("100 Million");
+   //    String s4= p.MNumber(st1);
+        String s5= p.changeNum("13,908", 1000);
+        System.out.println(s5);
     }
 }
