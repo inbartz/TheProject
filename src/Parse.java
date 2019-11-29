@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -18,11 +19,30 @@ import java.util.stream.Stream;
 public class Parse {
 
     private ArrayList<String> stopWords;
+    private HashMap<String,Integer> m_termDictionery;
+    HashMap<String,Doc> m_DocsToParse;
 
 
-    public Parse(){
+    public Parse(HashMap<String,Doc> docsToParse){
+        m_termDictionery = new HashMap<>();
+        m_DocsToParse = docsToParse;
     }
 
+    public void startParsing(){
+        for( String docId : m_DocsToParse.keySet()) {
+            //assign all rules
+
+            //split text and build terms
+            splitText(docId);
+
+        }
+        }
+
+    private void splitText(String docId){
+            Doc currDoc = m_DocsToParse.get(docId);
+            String[] parsetText = currDoc.getM_text().toString().split("[ \\:\"\\#\\;\\!\\~\\+\\*\\=\\<\\>\\^\\?\\_\\@\\`\\|\\&\\}\\{\\)\\(\\]\\[\\\t\\\\]");
+
+    }
     /**
      * creat the stop word set
      * @throws IOException
@@ -88,13 +108,13 @@ public class Parse {
     }
 
     public String MNumber( StringBuilder text){
-        String regularE = " ([0-9]{1,3}[,]+[0-9]{3}[,])+[0-9]{3}|([0-9]{1,3}\\s\\Million\\b)";
+        String regularE = "((\\d{1,3}[,]\\d{3}[,]\\d{3})|(\\d{1,3}\\s\\bMillion\\b))";
         Matcher matcheToKNumber = findMatches(regularE , text);
         String newStrForm="";
         while (matcheToKNumber.find()){
             String group0 = matcheToKNumber.group(0);
             if (matcheToKNumber.group(0).contains("Million")){
-                String[]s =matcheToKNumber.group(2).split("[M,\\ ]");
+                String[]s =matcheToKNumber.group(0).split("M");
                 newStrForm = s[0]+"M";
             }
             else{
@@ -109,32 +129,28 @@ public class Parse {
         int accuracy = 3;
         String d = ""+divider;
         int dividerByNum = d.length()-1;
-        StringBuilder newNumber =removePsik(number);
 
+        StringBuilder newNumber =removePsik(number);
         String result = "";
         if((!newNumber.toString().contains("."))){
             newNumber.append(".");
         }
         String stringNewNum = newNumber.toString();
-        StringBuilder removeZ = new StringBuilder();
+
         for(int i = newNumber.length()-1 ; i >=0 ;i--) {
             if (stringNewNum.charAt(i) == '.') {
                 int pointLocation = i-dividerByNum;
+
                 for(int j =0 ; j < newNumber.length();j++){
                     if(pointLocation==j){
                         result=result+".";
+
                         for (int k = j; k < newNumber.length()&&accuracy>0 ;k++){
                             accuracy--;
                             result=result+stringNewNum.charAt(k);
                         }
-                        removeZ.append(result);
-                        for(int p = result.length()-1; p>0 ;p--){
-                            if(result.charAt(p)==0){
-                                removeZ.deleteCharAt(p);
-                            }
-
-                            return removeZ.toString();
-                        }
+                        result =removeZero(result);
+                        return result;
                     }
                     else {
                         result=result+stringNewNum.charAt(j);
@@ -142,7 +158,26 @@ public class Parse {
                 }
             }
         }
+        result = removeZero(result);
         return result;
+    }
+
+    private String removeZero(String removeFrom){
+        StringBuilder result = new StringBuilder();
+        result.append(removeFrom);
+        for (int i = result.length()-1; i>=0 ;i--){
+            if(result.charAt(i)=='0'){
+                result.deleteCharAt(i);
+            }
+            else if(result.charAt(i)=='.'){
+                result.deleteCharAt(i);
+                return result.toString();
+            }
+            else {
+                return result.toString();
+            }
+        }
+        return result.toString();
     }
 
     private StringBuilder removePsik(String number) {
@@ -153,5 +188,15 @@ public class Parse {
             }
         }
         return newStr;
+    }
+
+    public StringBuilder presentage(StringBuilder text){
+        String regularE = "\\d+(.?)+(\\s\\bpercent\\b|\\s\\bpercentage\\b)";
+        Matcher matcheToPres = findMatches(regularE , text);
+        while (matcheToPres.find()){
+            String s = matcheToPres.group(0);
+            replaceMatcheToPattern(matcheToPres.start(),matcheToPres.end(),text,matcheToPres.group(0)+"%");
+        }
+        return text;
     }
 }

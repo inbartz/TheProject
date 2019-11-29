@@ -48,10 +48,14 @@ public class Main {
 
          Parse p = new Parse();
        //  p.findPattern("(\\d)+(\\d)+(/)+(\\d)+(\\d)+( )",s);
-       // StringBuilder st1 = new StringBuilder();
-        //st1.append("100 Million");
-   //    String s4= p.MNumber(st1);
-        String s5= p.changeNum("13,908", 1000);
-        System.out.println(s5);
+        StringBuilder st1 = new StringBuilder();
+        st1.append("10 percentage");
+        //String s4= p.MNumber(st1);
+        //System.out.println(s4);
+        //String s5= p.changeNum("1,050,060", 1000000);
+        //System.out.println(s5);
+        p.presentage(st1);
+        System.out.println(st1);
+
     }
 }

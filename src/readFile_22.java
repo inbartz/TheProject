@@ -15,20 +15,36 @@ import java.util.regex.Pattern;
 public class readFile_22 {
 
     private HashMap<String,Doc> allDocs;
+    private Parse parse;
 
     public readFile_22(String path) throws IOException{
         allDocs = new HashMap<>();
         listFilesForFolder(new File(path));
-        System.out.println("g");
+        parse = new Parse(allDocs);
     }
 
+    /**
+     * reads 10 files, separate them to docs and send them to the parser
+     * @param folder
+     * @throws IOException
+     */
     public void listFilesForFolder(final File folder) throws IOException {
-        for (File fileEntry : folder.listFiles()) {
-            File currFile = null;
-            currFile = fileEntry.listFiles()[0];
-            //split the file into documents
-            fromFileToDocs(currFile,fileEntry.getPath());
-        }
+        int count = 10;
+
+            for (File fileEntry : folder.listFiles()) {
+                while (count>0){
+                    File currFile = null;
+                    currFile = fileEntry.listFiles()[0];
+                    //split the file into documents
+                    fromFileToDocs(currFile,fileEntry.getPath());
+                    count--;
+                }
+                parse.startParsing();
+                count = 10;
+                allDocs=new HashMap<>();
+            }
+
+
     }
 
     public void fromFileToDocs(File file,String path){
@@ -37,7 +53,7 @@ public class readFile_22 {
             org.jsoup.select.Elements ListOfDocs = (org.jsoup.select.Elements)( xmlFile.getElementsByTag("DOC"));
             for(Element element : ListOfDocs){
                 Doc newDoc = new Doc(element,path);
-                allDocs.put(newDoc.getDocNum(),newDoc);
+                allDocs.put(newDoc.getM_docNum(),newDoc);
             }
         }
         catch (
