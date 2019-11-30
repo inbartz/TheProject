@@ -3,8 +3,8 @@ import java.util.HashMap;
 
 public class Term {
 //    private boolean mIsAlwaysCapital;
-    private String m_Term;
-    private ArrayList<TermDocFrequency> m_DocFrequencies;
+    public String m_Term;
+    public ArrayList<TermDocFrequency> m_DocFrequencies;
     public Term(String term) {
         this.m_Term = term;
     }
@@ -16,6 +16,11 @@ public class Term {
 
     public void updateTerm(String docId, int numOccurrences, int overallNumOfWords){
         this.m_DocFrequencies.add(new TermDocFrequency(docId, numOccurrences, overallNumOfWords));
+    }
+
+    public void merge(Term term){
+        // term.m_Term == this.m_Term
+        this.m_DocFrequencies.addAll(term.m_DocFrequencies);
     }
 
     String serialize(){

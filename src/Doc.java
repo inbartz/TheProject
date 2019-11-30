@@ -86,7 +86,7 @@ public class Doc {
         this.m_sizeOfDoc = m_sizeOfDoc;
     }
 
-    public StringBuilder getM_text() {
+    public String getM_text() {
         return m_text;
     }
 }
