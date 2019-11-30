@@ -21,7 +21,7 @@ class Parser {
     private ArrayList<String> stopWords;
 
     Parser() throws IOException {
-        this.createSetOfStopWords();
+//        this.createSetOfStopWords();
     }
 
     /**

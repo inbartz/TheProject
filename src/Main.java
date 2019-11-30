@@ -8,8 +8,8 @@ import java.util.regex.Pattern;
 
 public class Main {
 
-    public static void main(String[] args) {
-        String s = "maor is $3bn U.S. dollars between 10 and 100 and a 55.0008 percent accuracy 06 MAY or i masdf sdf May 1995";
+    public static void main(String[] args) throws IOException {
+        String s = "maor is $3bn U.S. dollars between 10 and 100 and a 55.0008 percent accuracy 06 MAY 1994 or i masdf sdf May 1995";
         Parser parser = new Parser();
         s = parser.cleanDoc(s);
         System.out.println(s);

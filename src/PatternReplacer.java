@@ -17,25 +17,11 @@ public abstract class PatternReplacer {
 
 
     public abstract String getPattern();
-    private String _getNextWordAfterIndex(String text, int index) {
-        String textAsOfIndex = text.substring(index);
-        String word = "";
-        if (textAsOfIndex.length() > 0 && textAsOfIndex.startsWith(" ")){
-            word += " ";
-            textAsOfIndex = textAsOfIndex.trim();
-        }
-        String[] words = textAsOfIndex.split(" ");
 
-        if (words.length > 0){
-            word += words[0];
-        }
-        return word;
-    }
     public abstract String getReplacement(String term);
 
     private String _replaceBetweenIndexes(String text, int start, int end, String replacement){
         return text.substring(0, start) + replacement + text.substring(end);
-
     }
 
     private Matcher _matchPattern(String text, String stringPattern){
@@ -43,7 +29,8 @@ public abstract class PatternReplacer {
         return pattern.matcher(text);
     }
 
-    public String replacePattern(String text){
+    //replace the new form pattern by adjusting to the size of the new pattern
+    String replacePattern(String text){
         Matcher matcher = this._matchPattern(text.toLowerCase(), this.getPattern());
         int offset = 0;
         while(matcher.find()) {
@@ -64,10 +51,12 @@ public abstract class PatternReplacer {
 
 
 
-
+// numbers handlers:
 class NumberReplacer extends PatternReplacer {
 
     @Override
+    //check if good for capital letters
+    //check if needs space before bn
     public String getPattern() {
         return getNumberPattern() + "([\\s]thousand)?([\\s]million)?([\\s]billion)?(bn)?";
     }
@@ -92,6 +81,7 @@ class NumberReplacer extends PatternReplacer {
     }
 
     private String _formatNumber(double number){
+        // understand format- if less then tree
         DecimalFormat df = new DecimalFormat("#.###");
         if (number >= 1000 * 1000 * 1000){
             return df.format(number / (1000*1000*1000)).toString()+ 'B';
@@ -108,11 +98,16 @@ class NumberReplacer extends PatternReplacer {
     }
 }
 
-
+// dates
 abstract class MonthAndNumberReplacer extends PatternReplacer {
     String[] _getMonths(){
-        return new String[] {"january","february","march","april","may","june","july","august","september",
-                "october","november","december"};
+        //check capital lleters
+        return new String[] {"january","february","march","april","may","june","july",
+                "august","september","october","november","december"};
+    }
+    String[] _getExtendedMonths() {
+        return new String[] {"january","jan","february","feb","march","mar","april","apr","may","june","jun","july",
+                "jul","august","aug","september","sep","october","oct","november","nov","december","dec"};
     }
 
     int parseNumber (String numberString){
@@ -121,27 +116,30 @@ abstract class MonthAndNumberReplacer extends PatternReplacer {
 
     private String formatTwoDigitsNumber(int date){
         if (date < 10){
-            return "0" + Integer.toString(date);
+            return "0" +date;
         }
         return Integer.toString(date);
     }
 
     @Override
     public String getReplacement(String match) {
+        //here we added the shortcut option- 3 letters for each month
+        //check capital letters
         String oldMatch  = match;
         String[] months = _getMonths();
         String formattedMonth = "";
-        for (int monthIndex = 0; monthIndex < months.length; monthIndex ++){
-            if (match.contains(months[monthIndex])){
+        for (int monthIndex = 0; monthIndex < months.length; monthIndex+=2){
+            if (match.contains(months[monthIndex])|| match.contains(months[monthIndex].substring(0,3))){
                 formattedMonth = this.formatTwoDigitsNumber(monthIndex + 1);
                 match = match.replace(months[monthIndex], "").trim();
             }
         }
+        //asssk
         if (match.length() == 0){
             // no other number
             return oldMatch;
         }
-
+        //ask
         int otherNumber = parseNumber(match);
         return formatMonthAndNumber(this.formatTwoDigitsNumber(otherNumber),formattedMonth);
     }
@@ -152,11 +150,13 @@ abstract class MonthAndNumberReplacer extends PatternReplacer {
 class MonthAndDayReplacer extends MonthAndNumberReplacer{
     @Override
     public String getPattern() {
-        String monthsPattern = String.join("|", _getMonths());
+        String monthsPattern = String.join("|", _getExtendedMonths());
         return "([0-9][0-9]?[\\s]?)?" +
                 "(" + monthsPattern + ")" +
                 "([0-9][0-9]?[\\s]?)?";
     }
+
+
 
     @Override
     String formatMonthAndNumber(String monthString, String otherNumberString) {
@@ -167,26 +167,29 @@ class MonthAndDayReplacer extends MonthAndNumberReplacer{
 class MonthAndYearReplacer extends MonthAndNumberReplacer{
     @Override
     public String getPattern() {
-        String monthsPattern = String.join("|", _getMonths());
+        String monthsPattern = String.join("|", _getExtendedMonths());
         return "(" + monthsPattern + ")" +
                 "([\\s][1-9][.][0-9][0-9][0-9][k])";
     }
 
     @Override
-    String formatMonthAndNumber(String monthString, String otherNumberString) {
-        return otherNumberString + "-"+ monthString;
+    String formatMonthAndNumber(String monthString, String yearString) {
+        return yearString + "-"+ monthString;
     }
 }
 
-
+//dollar
 class DollarReplacer extends PatternReplacer {
     @Override
+    //check capital letters
     public String getPattern() {
+        // can find numbers that are not prices- better to do or
         return "[$]?" + getNumberPattern() + "[kmb]?[\\s]?(u.s.)?[\\s]?(dollars)?";
     }
 
     @Override
     public String getReplacement(String match) {
+        //not economic
         if (!(match.contains("$") || match.contains("dollars"))) {
             return match;
         }
@@ -215,11 +218,12 @@ class DollarReplacer extends PatternReplacer {
     }
 }
 
+// percent
 class PercentageReplacer extends PatternReplacer {
 
     @Override
     public String getPattern() {
-        return  "[%]?" + getNumberPattern() + "[\\s](percentage)?(percent)?";
+        return getNumberPattern() + "([%]|([\\s]percentage)|([\\s]percent))";
     }
 
     @Override
@@ -234,6 +238,7 @@ class PercentageReplacer extends PatternReplacer {
     }
 }
 
+//range
 class RangeReplacer extends PatternReplacer {
 
     @Override
